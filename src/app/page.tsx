@@ -1,121 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, CheckCircle, Circle } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface Email {
+  id: number;
+  email: string;
+  rubro: string;
+  fecha: string;
+  enviado: boolean;
+}
+
 export default function EmailDashboard() {
-  const [emails] = useState([
-    {
-      id: 1,
-      email: "ejemplo@gmail.com",
-      rubro: "Inmobiliaria",
-      fecha: "12/11/2025",
-      enviado: true,
-    },
-    {
-      id: 2,
-      email: "cliente@empresa.com",
-      rubro: "Gastronomía",
-      fecha: "10/11/2025",
-      enviado: false,
-    },
-    {
-      id: 3,
-      email: "contacto@modashop.com",
-      rubro: "Moda",
-      fecha: "09/11/2025",
-      enviado: true,
-    },
-    {
-      id: 4,
-      email: "ventas@techpro.com",
-      rubro: "Tecnología",
-      fecha: "08/11/2025",
-      enviado: false,
-    },
-    {
-      id: 5,
-      email: "info@turismoworld.com",
-      rubro: "Turismo",
-      fecha: "07/11/2025",
-      enviado: true,
-    },
-    {
-      id: 6,
-      email: "reservas@restogourmet.com",
-      rubro: "Gastronomía",
-      fecha: "06/11/2025",
-      enviado: false,
-    },
-    {
-      id: 7,
-      email: "clientes@finanzasmax.com",
-      rubro: "Finanzas",
-      fecha: "05/11/2025",
-      enviado: true,
-    },
-    {
-      id: 8,
-      email: "hola@beautyspa.com",
-      rubro: "Estética",
-      fecha: "04/11/2025",
-      enviado: false,
-    },
-    {
-      id: 9,
-      email: "equipo@marketingplus.com",
-      rubro: "Marketing",
-      fecha: "03/11/2025",
-      enviado: true,
-    },
-    {
-      id: 10,
-      email: "soporte@segurmax.com",
-      rubro: "Seguridad",
-      fecha: "02/11/2025",
-      enviado: false,
-    },
-    {
-      id: 11,
-      email: "turnos@clinicasalud.com",
-      rubro: "Salud",
-      fecha: "01/11/2025",
-      enviado: true,
-    },
-    {
-      id: 12,
-      email: "pedidos@minimarket.com",
-      rubro: "Alimentos",
-      fecha: "31/10/2025",
-      enviado: false,
-    },
-    {
-      id: 13,
-      email: "servicios@autosvip.com",
-      rubro: "Automotriz",
-      fecha: "30/10/2025",
-      enviado: true,
-    },
-    {
-      id: 14,
-      email: "contacto@eventoselite.com",
-      rubro: "Eventos",
-      fecha: "29/10/2025",
-      enviado: false,
-    },
-    {
-      id: 15,
-      email: "clientes@realstateglobal.com",
-      rubro: "Inmobiliaria",
-      fecha: "28/10/2025",
-      enviado: true,
-    },
-  ]);
+  const [emails, setEmails] = useState<Email[]>([]);
 
   const [openModal, setOpenModal] = useState(false);
+
+  const [emailsToSave, setEmailsToSave] = useState("");
+  const [rubro, setRubro] = useState("");
+
+  const [toggle, setToggle] = useState(false);
+
+  useEffect(() => {
+    fetch(`http://localhost:3001/email`, {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => setEmails(data))
+      .catch((e) => console.error(e));
+  }, [toggle]);
+
+  const reset = () => {
+    setEmailsToSave("");
+    setRubro("");
+  };
+
+  const handleClickCancel = () => {
+    setOpenModal(false);
+    reset();
+  };
+
+  const parseEmails = (arr: string) => {
+    const emailsLimpios = arr
+      .split(/[\n, ]+/)
+      .map((email) => email.trim())
+      .filter((email) => email !== "");
+    return emailsLimpios;
+  };
+
+  const handleClickSaveEmails = async () => {
+    if (!emailsToSave || !rubro) return;
+    const parsedEmailsToSave = parseEmails(emailsToSave);
+
+    try {
+      for (const email of parsedEmailsToSave) {
+        await fetch(`http://localhost:3001/email`, {
+          method: "POST",
+          body: JSON.stringify({ email, rubro }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+
+      setToggle((prev) => !prev);
+
+      handleClickCancel();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
@@ -159,7 +116,9 @@ export default function EmailDashboard() {
                 <tr key={item.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">{item.email}</td>
                   <td className="p-3">{item.rubro}</td>
-                  <td className="p-3">{item.fecha}</td>
+                  <td className="p-3">
+                    {item.fecha.split("T")[0].split("-").reverse().join("-")}
+                  </td>
                   <td className="p-3 text-center">
                     {item.enviado ? (
                       <CheckCircle className="text-green-600 w-5 h-5 mx-auto" />
@@ -184,19 +143,26 @@ export default function EmailDashboard() {
               <textarea
                 placeholder="Ingresá emails separados por coma, espacio o enter..."
                 className="w-full h-32 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={emailsToSave}
+                onChange={(e) => setEmailsToSave(e.target.value)}
               />
 
               <input
                 type="text"
                 placeholder="Rubro"
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={rubro}
+                onChange={(e) => setRubro(e.target.value)}
               />
 
               <div className="flex justify-end gap-3 mt-2">
-                <Button variant="outline" onClick={() => setOpenModal(false)}>
+                <Button variant="outline" onClick={handleClickCancel}>
                   Cancelar
                 </Button>
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                <Button
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={handleClickSaveEmails}
+                >
                   Guardar
                 </Button>
               </div>
