@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, CheckCircle, Circle } from "lucide-react";
+import { Plus, CheckCircle, Circle, Trash } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Email {
@@ -94,6 +94,18 @@ export default function EmailDashboard() {
     }
   };
 
+  const handleClickDelete = async (id: number) => {
+    try {
+      await fetch(`http://localhost:3001/email/${id}`, {
+        method: "DELETE",
+      });
+
+      setToggle((prev) => !prev);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
       {/* Header */}
@@ -140,17 +152,24 @@ export default function EmailDashboard() {
                     {item.fecha.split("T")[0].split("-").reverse().join("/")}
                   </td>
                   <td className="p-3 text-center">
-                    {item.send ? (
-                      <CheckCircle
-                        className="text-green-600 w-5 h-5 mx-auto"
-                        onClick={() => handleClickEditIsSend(item.id, false)}
+                    <div className="flex items-center justify-center gap-3">
+                      {item.send ? (
+                        <CheckCircle
+                          className="text-green-600 w-5 h-5 cursor-pointer"
+                          onClick={() => handleClickEditIsSend(item.id, false)}
+                        />
+                      ) : (
+                        <Circle
+                          className="text-gray-400 w-5 h-5 cursor-pointer"
+                          onClick={() => handleClickEditIsSend(item.id, true)}
+                        />
+                      )}
+
+                      <Trash
+                        className="text-red-600 w-5 h-5 cursor-pointer"
+                        onClick={() => handleClickDelete(item.id)}
                       />
-                    ) : (
-                      <Circle
-                        className="text-gray-400 w-5 h-5 mx-auto"
-                        onClick={() => handleClickEditIsSend(item.id, true)}
-                      />
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
