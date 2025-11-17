@@ -11,7 +11,7 @@ interface Email {
   email: string;
   rubro: string;
   fecha: string;
-  enviado: boolean;
+  send: boolean;
 }
 
 export default function EmailDashboard() {
@@ -29,7 +29,11 @@ export default function EmailDashboard() {
       method: "GET",
     })
       .then((res) => res.json())
-      .then((data) => setEmails(data))
+      .then((data) => {
+        console.log(data);
+
+        setEmails(data);
+      })
       .catch((e) => console.error(e));
   }, [toggle]);
 
@@ -69,6 +73,22 @@ export default function EmailDashboard() {
       setToggle((prev) => !prev);
 
       handleClickCancel();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleClickEditIsSend = async (id: number, isSend: boolean) => {
+    try {
+      await fetch(`http://localhost:3001/email/send/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ send: isSend }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      setToggle((prev) => !prev);
     } catch (error) {
       console.error(error);
     }
@@ -117,13 +137,19 @@ export default function EmailDashboard() {
                   <td className="p-3">{item.email}</td>
                   <td className="p-3">{item.rubro}</td>
                   <td className="p-3">
-                    {item.fecha.split("T")[0].split("-").reverse().join("-")}
+                    {item.fecha.split("T")[0].split("-").reverse().join("/")}
                   </td>
                   <td className="p-3 text-center">
-                    {item.enviado ? (
-                      <CheckCircle className="text-green-600 w-5 h-5 mx-auto" />
+                    {item.send ? (
+                      <CheckCircle
+                        className="text-green-600 w-5 h-5 mx-auto"
+                        onClick={() => handleClickEditIsSend(item.id, false)}
+                      />
                     ) : (
-                      <Circle className="text-gray-400 w-5 h-5 mx-auto" />
+                      <Circle
+                        className="text-gray-400 w-5 h-5 mx-auto"
+                        onClick={() => handleClickEditIsSend(item.id, true)}
+                      />
                     )}
                   </td>
                 </tr>
