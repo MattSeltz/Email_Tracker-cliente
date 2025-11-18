@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function RecoverPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -23,9 +25,9 @@ export default function RecoverPage() {
         </form>
         <p className="text-center text-sm mt-4 text-gray-600">
           ¿Recordaste tu contraseña?{" "}
-          <a href="/login" className="text-black font-semibold underline">
+          <Link href="/login" className="text-black font-semibold underline">
             Iniciar sesión
-          </a>
+          </Link>
         </p>
       </div>
     </div>

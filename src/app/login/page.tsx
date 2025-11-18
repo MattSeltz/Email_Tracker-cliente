@@ -1,13 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleClickLogin = async () => {
+    if (!email || !password) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        router.push("/");
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
@@ -42,23 +71,26 @@ export default function LoginPage() {
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
-              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 py-3 text-lg rounded-xl">
+              <Button
+                className="w-full bg-blue-600 text-white hover:bg-blue-700 py-3 text-lg rounded-xl"
+                onClick={handleClickLogin}
+              >
                 Ingresar
               </Button>
 
-              <a
+              <Link
                 href="/recover"
                 className="text-sm text-center text-blue-600 hover:underline"
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="/register"
                 className="text-sm text-center text-gray-600 hover:underline"
               >
                 ¿No tenés cuenta? Crear una
-              </a>
+              </Link>
             </div>
           </CardContent>
         </Card>

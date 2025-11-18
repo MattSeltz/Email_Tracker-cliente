@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, CheckCircle, Circle, Trash } from "lucide-react";
@@ -15,6 +16,8 @@ interface Email {
 }
 
 export default function EmailDashboard() {
+  const router = useRouter();
+
   const [emails, setEmails] = useState<Email[]>([]);
 
   const [openModal, setOpenModal] = useState(false);
@@ -29,11 +32,7 @@ export default function EmailDashboard() {
       method: "GET",
     })
       .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-
-        setEmails(data);
-      })
+      .then((data) => setEmails(data))
       .catch((e) => console.error(e));
   }, [toggle]);
 
@@ -106,6 +105,23 @@ export default function EmailDashboard() {
     }
   };
 
+  const handleClickLogout = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        alert("Error inesperado, vuelve a intentarlo");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
       {/* Header */}
@@ -125,6 +141,7 @@ export default function EmailDashboard() {
           <Button
             variant="outline"
             className="px-4 py-2 border border-gray-300 hover:bg-gray-200"
+            onClick={handleClickLogout}
           >
             Logout
           </Button>
