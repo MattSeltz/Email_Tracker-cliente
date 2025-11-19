@@ -19,7 +19,7 @@ export default function EmailDashboard() {
   const router = useRouter();
 
   const [emails, setEmails] = useState<Email[]>([]);
-
+  const [selectedRubro, setSelectedRubro] = useState(""); // <-- NUEVO FILTRO
   const [openModal, setOpenModal] = useState(false);
 
   const [emailsToSave, setEmailsToSave] = useState("");
@@ -52,7 +52,7 @@ export default function EmailDashboard() {
 
   const parseEmails = (arr: string) => {
     const emailsLimpios = arr
-      .split(/[\n, ]+/)
+      .split(/[\n, ,]+/)
       .map((email) => email.trim())
       .filter((email) => email !== "");
     return emailsLimpios;
@@ -79,7 +79,6 @@ export default function EmailDashboard() {
       }
 
       setToggle((prev) => !prev);
-
       handleClickCancel();
     } catch (error) {
       console.error(error);
@@ -133,6 +132,15 @@ export default function EmailDashboard() {
     }
   };
 
+  // -------- FILTRO DE RUBRO --------
+  const uniqueRubros = Array.from(new Set(emails.map((e) => e.rubro)));
+
+  const filteredEmails =
+    selectedRubro === ""
+      ? emails
+      : emails.filter((e) => e.rubro === selectedRubro);
+  // ---------------------------------
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
       {/* Header */}
@@ -161,6 +169,26 @@ export default function EmailDashboard() {
         </div>
       </motion.div>
 
+      {/* FILTRO DE RUBRO */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex gap-4 items-center"
+      >
+        <select
+          className="border border-gray-300 p-2 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500"
+          value={selectedRubro}
+          onChange={(e) => setSelectedRubro(e.target.value)}
+        >
+          <option value="">Todos los rubros</option>
+          {uniqueRubros.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+      </motion.div>
+
       {/* Table */}
       <Card className="shadow-lg">
         <CardContent className="p-0 overflow-x-auto">
@@ -174,7 +202,7 @@ export default function EmailDashboard() {
               </tr>
             </thead>
             <tbody>
-              {emails.map((item) => (
+              {filteredEmails.map((item) => (
                 <tr key={item.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">{item.email}</td>
                   <td className="p-3">{item.rubro}</td>
@@ -208,7 +236,7 @@ export default function EmailDashboard() {
         </CardContent>
       </Card>
 
-      {/* Modal UI */}
+      {/* Modal */}
       {openModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md animate-in fade-in zoom-in">
