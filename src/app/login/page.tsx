@@ -29,6 +29,8 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
+        localStorage.setItem("user", email.split("@")[0]);
+        localStorage.setItem("userId", data.id);
         router.push("/");
       } else {
         alert(data.error);

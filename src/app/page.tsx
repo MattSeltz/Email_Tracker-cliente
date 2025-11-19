@@ -28,9 +28,13 @@ export default function EmailDashboard() {
   const [toggle, setToggle] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/email`, {
-      method: "GET",
-    })
+    fetch(
+      `http://localhost:3001/email?userId=${localStorage.getItem("userId")}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    )
       .then((res) => res.json())
       .then((data) => setEmails(data))
       .catch((e) => console.error(e));
@@ -62,7 +66,12 @@ export default function EmailDashboard() {
       for (const email of parsedEmailsToSave) {
         await fetch(`http://localhost:3001/email`, {
           method: "POST",
-          body: JSON.stringify({ email, rubro }),
+          credentials: "include",
+          body: JSON.stringify({
+            email,
+            rubro,
+            userId: localStorage.getItem("userId"),
+          }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -81,6 +90,7 @@ export default function EmailDashboard() {
     try {
       await fetch(`http://localhost:3001/email/send/${id}`, {
         method: "PUT",
+        credentials: "include",
         body: JSON.stringify({ send: isSend }),
         headers: {
           "Content-Type": "application/json",
@@ -97,6 +107,7 @@ export default function EmailDashboard() {
     try {
       await fetch(`http://localhost:3001/email/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       setToggle((prev) => !prev);
@@ -130,7 +141,9 @@ export default function EmailDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-center"
       >
-        <h1 className="text-3xl font-semibold">Bienvenido, Matías 👋</h1>
+        <h1 className="text-3xl font-semibold">
+          Bienvenido, {localStorage.getItem("user")} 👋
+        </h1>
         <div className="flex items-center gap-3">
           <Button
             onClick={() => setOpenModal(true)}
