@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,12 +22,25 @@ interface Email {
   send: boolean;
 }
 
+// Hook personalizado para localStorage que funciona con SSR
+function useLocalStorage(key: string, defaultValue: string) {
+  const subscribe = () => () => {};
+  const getSnapshot = () => {
+    if (typeof window === "undefined") return defaultValue;
+    return localStorage.getItem(key) || defaultValue;
+  };
+  const getServerSnapshot = () => defaultValue;
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
 export default function EmailDashboard() {
   const router = useRouter();
 
   const [emails, setEmails] = useState<Email[]>([]);
-  const [selectedRubro, setSelectedRubro] = useState(""); // <-- NUEVO FILTRO
+  const [selectedRubro, setSelectedRubro] = useState("");
   const [openModal, setOpenModal] = useState(false);
+  const userName = useLocalStorage("user", "Usuario");
 
   const [emailsToSave, setEmailsToSave] = useState("");
   const [rubro, setRubro] = useState("");
@@ -108,14 +121,12 @@ export default function EmailDashboard() {
     }
   };
 
-  // -------- FILTRO DE RUBRO --------
   const uniqueRubros = Array.from(new Set(emails.map((e) => e.rubro)));
 
   const filteredEmails =
     selectedRubro === ""
       ? emails
       : emails.filter((e) => e.rubro === selectedRubro);
-  // ---------------------------------
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
@@ -125,9 +136,7 @@ export default function EmailDashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-center"
       >
-        <h1 className="text-3xl font-semibold">
-          Bienvenido, {localStorage.getItem("user")} 👋
-        </h1>
+        <h1 className="text-3xl font-semibold">Bienvenido, {userName} 👋</h1>
         <div className="flex items-center gap-3">
           <Button
             onClick={() => setOpenModal(true)}
