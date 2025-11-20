@@ -1,9 +1,7 @@
 export const getEmails = async () => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER}/email?userId=${localStorage.getItem(
-        "userId"
-      )}`,
+      `/api/email?userId=${localStorage.getItem("userId")}`,
       {
         method: "GET",
         credentials: "include",
@@ -20,7 +18,7 @@ export const getEmails = async () => {
 
 export const saveEmail = async (email: string, rubro: string) => {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER}/email`, {
+    await fetch(`/api/email`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({
@@ -39,7 +37,7 @@ export const saveEmail = async (email: string, rubro: string) => {
 
 export const editIsSend = async (id: number, isSend: boolean) => {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER}/email/send/${id}`, {
+    await fetch(`/api/email/send/${id}`, {
       method: "PUT",
       credentials: "include",
       body: JSON.stringify({ send: isSend }),
@@ -54,7 +52,7 @@ export const editIsSend = async (id: number, isSend: boolean) => {
 
 export const deleteEmail = async (id: number) => {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER}/email/${id}`, {
+    await fetch(`/api/email/${id}`, {
       method: "DELETE",
       credentials: "include",
     });
@@ -65,7 +63,7 @@ export const deleteEmail = async (id: number) => {
 
 export const logout = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/auth/logout`, {
+    const res = await fetch(`/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
@@ -82,7 +80,7 @@ export const verifyCodeEmail = async (
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER}/recovery/verify-code/${code}?email=${emailFromQuery}`,
+      `/api/recovery/verify-code/${code}?email=${emailFromQuery}`,
       {
         method: "GET",
         cache: "no-store",
@@ -100,14 +98,11 @@ export const updatePassword = async (
   email: string | null
 ) => {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER}/recovery/update-password`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, email }),
-      }
-    );
+    const res = await fetch(`/api/recovery/update-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password, email }),
+    });
 
     return res.ok;
   } catch (error) {
@@ -117,7 +112,7 @@ export const updatePassword = async (
 
 export const register = async (email: string, password: string) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/auth/register`, {
+    const res = await fetch(`/api/auth/register`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ email, password }),
@@ -136,7 +131,7 @@ export const register = async (email: string, password: string) => {
 
 export const login = async (email: string, password: string) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER}/auth/login`, {
+    const res = await fetch(`/api/auth/login`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ email, password }),
@@ -155,17 +150,14 @@ export const login = async (email: string, password: string) => {
 
 export const sendEmail = async (email: string) => {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER}/recovery/send-email`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({ email }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const res = await fetch(`/api/recovery/send-email`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ email }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     return res.ok;
   } catch (error) {
