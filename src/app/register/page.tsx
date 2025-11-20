@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { register } from "@/services/services";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -21,21 +22,12 @@ export default function RegisterPage() {
       return alert("Las contraseñas no coinciden");
 
     try {
-      const res = await fetch(`http://localhost:3001/auth/register`, {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await register(email, password);
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (res?.isSuccess) {
         router.push("/login");
       } else {
-        alert(data.error);
+        alert(res?.data.error);
       }
     } catch (error) {
       console.error(error);

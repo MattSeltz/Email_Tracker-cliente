@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, CheckCircle, Circle, Trash } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  deleteEmail,
+  editIsSend,
+  getEmails,
+  logout,
+  saveEmail,
+} from "@/services/services";
 
 interface Email {
   id: number;
@@ -28,14 +35,7 @@ export default function EmailDashboard() {
   const [toggle, setToggle] = useState(false);
 
   useEffect(() => {
-    fetch(
-      `http://localhost:3001/email?userId=${localStorage.getItem("userId")}`,
-      {
-        method: "GET",
-        credentials: "include",
-      }
-    )
-      .then((res) => res.json())
+    getEmails()
       .then((data) => setEmails(data))
       .catch((e) => console.error(e));
   }, [toggle]);
@@ -64,18 +64,7 @@ export default function EmailDashboard() {
 
     try {
       for (const email of parsedEmailsToSave) {
-        await fetch(`http://localhost:3001/email`, {
-          method: "POST",
-          credentials: "include",
-          body: JSON.stringify({
-            email,
-            rubro,
-            userId: localStorage.getItem("userId"),
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        await saveEmail(email, rubro);
       }
 
       setToggle((prev) => !prev);
@@ -87,14 +76,7 @@ export default function EmailDashboard() {
 
   const handleClickEditIsSend = async (id: number, isSend: boolean) => {
     try {
-      await fetch(`http://localhost:3001/email/send/${id}`, {
-        method: "PUT",
-        credentials: "include",
-        body: JSON.stringify({ send: isSend }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await editIsSend(id, isSend);
 
       setToggle((prev) => !prev);
     } catch (error) {
@@ -104,10 +86,7 @@ export default function EmailDashboard() {
 
   const handleClickDelete = async (id: number) => {
     try {
-      await fetch(`http://localhost:3001/email/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      await deleteEmail(id);
 
       setToggle((prev) => !prev);
     } catch (error) {
@@ -117,12 +96,9 @@ export default function EmailDashboard() {
 
   const handleClickLogout = async () => {
     try {
-      const res = await fetch(`http://localhost:3001/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const isSuccess = await logout();
 
-      if (res.ok) {
+      if (isSuccess) {
         router.push("/login");
       } else {
         alert("Error inesperado, vuelve a intentarlo");

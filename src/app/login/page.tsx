@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { login } from "@/services/services";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,23 +18,14 @@ export default function LoginPage() {
     if (!email || !password) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/auth/login`, {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await login(email, password);
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (res?.isSuccess) {
         localStorage.setItem("user", email.split("@")[0]);
-        localStorage.setItem("userId", data.id);
+        localStorage.setItem("userId", res?.data.id);
         router.push("/");
       } else {
-        alert(data.error);
+        alert(res?.data.error);
       }
     } catch (error) {
       console.error(error);

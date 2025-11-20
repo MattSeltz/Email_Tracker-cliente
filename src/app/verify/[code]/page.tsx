@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { updatePassword, verifyCodeEmail } from "@/services/services";
 
 export default function Verify({
   params,
@@ -27,15 +28,9 @@ export default function Verify({
 
     const verifyCode = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3001/recovery/verify-code/${code}?email=${emailFromQuery}`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
+        const isSuccess = await verifyCodeEmail(code, emailFromQuery);
 
-        if (!res.ok) {
+        if (!isSuccess) {
           setError("El código de recuperación es inválido o ya expiró.");
           setValid(false);
         } else {
@@ -57,18 +52,10 @@ export default function Verify({
     e.preventDefault();
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/recovery/update-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password, email }),
-        }
-      );
+      const isSuccess = await updatePassword(password, email);
 
-      if (!res.ok) {
-        const data = await res.json();
-        return alert(data.message || "No se pudo actualizar la contraseña.");
+      if (!isSuccess) {
+        return alert("No se pudo actualizar la contraseña.");
       }
 
       alert("Contraseña actualizada correctamente.");

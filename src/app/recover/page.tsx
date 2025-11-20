@@ -1,5 +1,6 @@
 "use client";
 
+import { sendEmail } from "@/services/services";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,16 +13,9 @@ export default function RecoverPage() {
     if (!email) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/recovery/send-email`, {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({ email }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const isSuccess = await sendEmail(email);
 
-      if (res.ok) {
+      if (isSuccess) {
         alert("Correo enviado correctamente!");
       } else {
         alert("Error inesperado, vuelve a intentarlo");
