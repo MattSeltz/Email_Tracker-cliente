@@ -1,19 +1,51 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function RecoverPage() {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/recovery/send-email`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        alert("Correo enviado correctamente!");
+      } else {
+        alert("Error inesperado, vuelve a intentarlo");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow p-8">
         <h2 className="text-2xl font-semibold text-center mb-6">
           Recuperar contraseña
         </h2>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               placeholder="tuemail@gmail.com"
               className="w-full border rounded-xl p-3 focus:outline-none focus:ring"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <button
